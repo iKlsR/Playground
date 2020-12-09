@@ -1,0 +1,11 @@
+cmake ../ -G "MinGW Makefiles" -DCMAKE_PREFIX_PATH="C:/Qt/5.9.1/mingw53_32"/ -DCMAKE_BUILD_TYPE="Debug" && make -j8
+
+https://github.com/Zouch/HelloGL
+https://github.com/bast/cmake-example
+http://blog.jholewinski.org/direct3d-11-with-qt-4/index.html
+https://github.com/troyane/lambdaConcurrent
+http://amin-ahmadi.com/2016/09/22/how-to-build-qt-5-7-statically-using-msvc14-microsoft-visual-studio-2015/
+
+https://github.com/tunabrain/sparse-voxel-octrees
+https://github.com/ebruneton/precomputed_atmospheric_scattering
+https://github.com/benikabocha/saba

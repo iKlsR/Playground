@@ -1,0 +1,4 @@
+#ifndef PL_FRAMEBUFFER_HPP
+#define PL_FRAMEBUFFER_HPP
+
+#endif // PL_FRAMEBUFFER_HPP

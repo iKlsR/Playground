@@ -1,0 +1,179 @@
+# Set minimum required cmake version to build, anything over 3 is good to get cool new features
+cmake_minimum_required(VERSION 3.3 FATAL_ERROR)
+# Set the project name, version and supported lang
+project(Playground)
+# Set our module path, we keep find targets here, macros etc
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+# Include some stuff from our module path
+include(UseModernCpp)
+# Must use GNUInstallDirs to install libraries into correct locations on all platforms.
+include(GnuInstallDirs)
+
+# set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+find_package(OpenGL REQUIRED) # is this needed?
+find_package(Qt5 REQUIRED COMPONENTS Widgets OpenGL)
+#find_package(Assimp REQUIRED)
+
+# if (Qt5Widgets_FOUND)
+#     if (Qt5Widgets_VERSION VERSION_LESS 5.7.0)
+#         message(FATAL_ERROR "Minimum supported Qt5 version is 5.70!")
+#     endif()
+# else()
+#     message(SEND_ERROR "The Qt5Widgets library could not be found!")
+# endif(Qt5Widgets_FOUND)
+
+# Add a compiler flag
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
+use_cxx11()
+
+# Disable compiler specific warnings if we are building with MSVC
+# NOMINMAX - http://www.suodenjoki.dk/us/archive/2010/min-max.htm
+if(MSVC)
+    add_definitions("-D_CRT_SECURE_NO_WARNINGS" "-DNOMINMAX")
+endif()
+
+# if (CMAKE_COMPILER_IS_GNUCXX)
+#     set(CXX_WARNINGS "-Wall -Wextra -Wpointer-arith -Wcast-align -fstrict-aliasing -Wno-unused-local-typedefs -Wno-misleading-indentation -Wno-maybe-uninitialized -Wno-int-in-bool-context -Wno-implicit-fallthrough")
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_WARNINGS} -fvisibility-inlines-hidden")
+# endif()
+
+# Project specific flags
+SET(WIN32_OPENGL_LINK_FLAGS "-lopengl32 -lgdi32")
+
+# Build type is debug by default
+# if(NOT CMAKE_BUILD_TYPE)
+#    set(CMAKE_BUILD_TYPE "Debug" ... FORCE)
+# endif()
+
+set(GL3W_ROOT "${CMAKE_SOURCE_DIR}/extern/gl3w")
+
+set(GL3W_INC "${GL3W_ROOT}/include")
+set(GL3W_SRC "${GL3W_ROOT}/src/gl3w.c")
+
+# TODO - fix this
+# if (NOT EXISTS ${GL3W_ROOT})
+#     message(STATUS "Updating submodules")
+#     execute_process(COMMAND git submodule init)
+#     execute_process(COMMAND git submodule update)
+# endif()
+
+if (NOT EXISTS ${GL3W_SRC})
+    message(STATUS "Generating gl3w source files")
+    execute_process(COMMAND python gl3w_gen.py
+                    WORKING_DIRECTORY ${GL3W_ROOT})
+endif()
+
+# set(ZLIB_LIBRARIES zlibstatic)
+# set(ENABLE_BOOST_WORKAROUND ON)
+# set(ASSIMP_BUILD_ASSIMP_TOOLS OFF)
+# set(ASSIMP_BUILD_TESTS OFF)
+# set(ASSIMP_BUILD_STATIC_LIB ON)
+# set(ASSIMP_NO_EXPORT ON)
+# option(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT "" OFF)
+# option(ASSIMP_BUILD_OBJ_IMPORTER "" ON)
+
+# Override options in subproject, the command MUST match the one in the project, ie set/option
+# https://stackoverflow.com/q/14061605/996468
+option(ASSIMP_BUILD_ASSIMP_TOOLS "" OFF)
+option(ASSIMP_BUILD_TESTS "" OFF)
+option(ASSIMP_NO_EXPORT "" OFF)
+option(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT "" OFF)
+option(ASSIMP_BUILD_OBJ_IMPORTER "" ON)
+option(ASSIMP_BUILD_GLTF_IMPORTER "" ON)
+option(ASSIMP_BUILD_FBX_IMPORTER "" ON)
+option(ASSIMP_BUILD_ZLIB "" ON)
+
+# set variables that are needed
+add_subdirectory(extern/assimp)
+
+# add include directories
+# include_directories(
+#     "${PROJECT_BINARY_DIR}/extern/assimp/include/"
+#     "${PROJECT_SOURCE_DIR}/extern/assimp/include/"
+# )
+target_include_directories(assimp PUBLIC extern/assimp/include)
+
+# find_package(Assimp REQUIRED)
+# include_directories(${ASSIMP_INCLUDE_DIRS})
+
+# if (assimp_FOUND)
+#     message(FATAL_ERROR "assimp_FOUND")
+# else()
+#     message(SEND_ERROR "assimp not found")
+# endif(assimp_FOUND)
+
+set(SOURCES
+    src/MainWindow.cpp
+    src/Framebuffer.cpp
+    src/Renderer.cpp
+    src/Scene.cpp
+    src/Shader.cpp
+    src/Model.cpp
+    src/Input.cpp
+    src/Geometry.cpp
+    src/Mesh.cpp
+    src/Entity.cpp
+    src/Transform.cpp
+    src/Trimesh.cpp
+    src/GlobalFilter.cpp
+    src/Texture.cpp
+    src/Camera.cpp
+    src/Material.cpp
+    src/Widgets/Button.cpp
+    src/Widgets/Label.cpp
+    src/Widgets/Slider.cpp
+    src/Widgets/ColorPicker.cpp
+    src/Widgets/TextInput.cpp
+    src/Widgets/CheckBox.cpp
+    src/Widgets/TexturePicker.cpp
+)
+
+set(HEADERS
+    src/MainWindow.hpp
+    src/Framebuffer.hpp
+    src/Renderer.hpp
+    src/Scene.hpp
+    src/Shader.hpp
+    src/Model.hpp
+    src/Input.hpp
+    src/Geometry.hpp
+    src/Mesh.hpp
+    src/Entity.hpp
+    src/Transform.hpp
+    src/Trimesh.hpp
+    src/GlobalFilter.hpp
+    src/Texture.hpp
+    src/Camera.hpp
+    src/Material.hpp
+    src/Util.hpp
+    src/Widgets/Button.hpp
+    src/Widgets/Label.hpp
+    src/Widgets/Slider.hpp
+    src/Widgets/ColorPicker.hpp
+    src/Widgets/TextInput.hpp
+    src/Widgets/CheckBox.hpp
+    src/Widgets/TexturePicker.hpp
+)
+
+qt5_wrap_cpp(HEADERS_moc ${HEADERS})
+
+include_directories(
+    ${GL3W_INC}
+)
+
+SET(BUILD_SHARED_LIBS OFF)
+
+# Make this a GUI application on Windows, otherwise we want debug information to print
+if(WIN32 AND CMAKE_BUILD_TYPE EQUAL "Release")
+    set(CMAKE_WIN32_EXECUTABLE ON)
+    # This may or may not be needed, keep around just in case
+    # SET( CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${WIN32_OPENGL_LINK_FLAGS}" )
+endif()
+
+# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+add_executable(Playground src/main.cpp ${GL3W_SRC} ${SOURCES} ${HEADERS_moc})
+target_link_libraries (Playground Qt5::Widgets Qt5::OpenGL assimp ${OPENGL_LIBRARIES})

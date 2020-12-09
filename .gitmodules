@@ -1,0 +1,6 @@
+[submodule "extern/gl3w"]
+	path = extern/gl3w
+	url = https://github.com/skaslev/gl3w.git
+[submodule "extern/assimp"]
+	path = extern/assimp
+	url = https://github.com/assimp/assimp.git
