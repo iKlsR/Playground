@@ -1,5 +1,4 @@
 #include "Model.hpp"
-//#include "texture.hpp"
 
 using std::string;
 using std::cerr;
